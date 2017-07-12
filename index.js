@@ -1,15 +1,15 @@
 /** I don't always put everything in a file
-but when I do it's casue I'm lazy */
+but when I do it's cause I'm lazy */
 
 const fs = require('fs');
 const Gdax = require('gdax');
 const axios = require('axios');
 const TelegramBot = require('node-telegram-bot-api');
 
-const isProduction = process.env.NODE_ENV === 'production'
+const isProduction = true;
 
 const apiBase = 'https://api.gdax.com';
-const token = (isProduction)? process.env.TELEGRAM_BOT_KEY : process.env.TELEGRAM_BOT_KEY_DEV;
+const token = '398444871:AAHHnKkpG6oLlnkPTfpoy_E6I28mF5E7Ze8';
 const delay = (isProduction)? 10000 : 1000;
 
 let db = fs.readFileSync('./db', 'utf-8');
@@ -47,10 +47,10 @@ function updateLast(last, what) {
 
 bot.onText(/\/start/, (msg, match) => {
   bot.sendMessage(msg.chat.id, 'This is an EXPERIMENTAL personal project.');
-  bot.sendMessage(msg.chat.id, 'Send /below THRESHOLD to be warned when the BTC-EUR rate goes below the threshold');
-  bot.sendMessage(msg.chat.id, 'Send /above THRESHOLD to be warned when the BTC-EUR rate goes above the threshold');
-  bot.sendMessage(msg.chat.id, 'Send btc to get the last BTC-EUR rate');
-  bot.sendMessage(msg.chat.id, 'Send eth to get the last ETH-EUR rate');
+  bot.sendMessage(msg.chat.id, 'Send /below THRESHOLD to be warned when the BTC-USD rate goes below the threshold');
+  bot.sendMessage(msg.chat.id, 'Send /above THRESHOLD to be warned when the BTC-USD rate goes above the threshold');
+  bot.sendMessage(msg.chat.id, 'Send btc to get the last BTC-USD rate');
+  bot.sendMessage(msg.chat.id, 'Send eth to get the last ETH-USD rate');
   bot.sendMessage(msg.chat.id, 'Send /stop to unsubscribe');
 });
 
@@ -76,36 +76,35 @@ bot.onText(/\/stop/, (msg, match) => {
 
 bot.onText(/btc/i, (msg, match) => {
   const chatId = msg.chat.id;
-  bot.sendMessage(chatId, `Last ETH-EUR rate: ${db.lastRates.btc}`);
+  bot.sendMessage(chatId, `Last BTC-USD rate: ${db.lastRates.btc}`);
 });
 
 bot.onText(/eth/i, (msg, match) => {
   const chatId = msg.chat.id;
-  bot.sendMessage(chatId, `Last ETH-EUR rate: ${db.lastRates.eth}`);
+  bot.sendMessage(chatId, `Last ETH-USD rate: ${db.lastRates.eth}`);
 });
-
-
 
 async function main() {
   let res = null;
   let last = null;
-  while (true) {
 
-    try{
-      res = await axios.get(apiBase + '/products/BTC-EUR/stats');
+  while (true) {
+    try {
+      res = await axios.get(apiBase + '/products/BTC-USD/stats');
       last = res.data.last;
       updateLast(last, 'btc');
-      res = await axios.get(apiBase + '/products/ETH-EUR/stats');
+      res = await axios.get(apiBase + '/products/ETH-USD/stats');
       last = res.data.last;
       updateLast(last, 'eth');
       console.log('Last rates: ', db.lastRates);
+
       for (let subscriber in db.subscribers) {
         const sub = db.subscribers[subscriber];
         if (db.lastRates.btc > sub.above && sub.above !== null) {
-          bot.sendMessage(subscriber, `Last BTC-EUR rate was ${db.lastRates.btc} (above ${sub.above})`);
+          bot.sendMessage(subscriber, `Last BTC-USD rate was ${db.lastRates.btc} (above ${sub.above})`);
         }
         if (db.lastRates.btc < sub.below && sub.below !== null) {
-          bot.sendMessage(subscriber, `Last ETH-EUR rate was ${db.lastRates.btc} (below ${sub.below})`);
+          bot.sendMessage(subscriber, `Last ETH-USD rate was ${db.lastRates.btc} (below ${sub.below})`);
         }
       };  
     } catch (e) {
