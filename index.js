@@ -9,7 +9,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const isProduction = true;
 
 const apiBase = 'https://api.gdax.com';
-const token = '398444871:AAHHnKkpG6oLlnkPTfpoy_E6I28mF5E7Ze8';
+const token = '';
 const delay = (isProduction)? 10000 : 1000;
 
 let db = fs.readFileSync('./db', 'utf-8');
